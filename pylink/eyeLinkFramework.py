@@ -811,8 +811,8 @@ class eyeLink:
         """
         col = findColour(colour)
         if col: self.et.sendCommand("draw_line {} {} {} {} {}".format(*pos1, *pos2, col.host))
-        else: print(f"No colour was found with name '{colour}'. Please check documentation for drawHostLine().")
-
+        else: print(f"No colour was found with name '{colour}'. Please check documentation for clearHostScreen()." if col == None else f"The host PC could not find colour id {col}, name {colour}. Please check documentation for clearHostScreen().")
+        
     def clearHostScreen(self, colour:str="BLACK") -> None:
         """Clears the Host PC's screen
 
@@ -840,7 +840,7 @@ class eyeLink:
         """
         col = findColour(colour)
         if col: self.et.sendCommand(f"clear_screen {col.host}")
-        else: print(f"No colour was found with name '{colour}'. Please check documentation for clearHostScreen().")
+        else: print(f"No colour was found with name '{colour}'. Please check documentation for clearHostScreen()." if col == None else f"The host PC could not find colour id {col}, name {colour}. Please check documentation for clearHostScreen().")
                             
     def clearDVScreen(self, colour:tuple[int,int,int]=GREY.rgb) -> None:
         """Tells DataViewer to clear the screen.
