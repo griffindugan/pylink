@@ -563,10 +563,9 @@ class eyeLink:
                                     pygame.time.get_ticks()]
                             got_key = True
 
-                    # on control+c, terminate task
-                    if (ev.type == KEYDOWN) and (ev.key == K_c):
-                        if ev.mod in [KMOD_LCTRL, KMOD_RCTRL, 4160, 4224]:
-                            parent.terminate()
+                    # on esc, terminate task
+                    if (ev.type == KEYDOWN) and (ev.key == K_ESCAPE):
+                        parent.terminate()
 
             # clear the screen following each keyboard response
             win_surf = pygame.display.get_surface()
@@ -587,24 +586,26 @@ class eyeLink:
             # TODO: abort could possibly be in eyeLink, not window, but eh
             # get the currently active tracker object (connection)
             # TODO: TEST WITH TRACKER FOR NECESSITY
-            et = pylink.getEYELINK()
-            if et != self.et: print("trackers not the same?")
+            if not self.parent.dm:
+                et = pylink.getEYELINK()
+                if et != self.et: print("trackers not the same?")
 
-            # Stop recording
-            if self.et.isRecording():
-                # add 100 ms to catch final trial events
-                pylink.pumpDelay(100)
-                self.et.stopRecording()
+                # Stop recording
+                if self.et.isRecording():
+                    # add 100 ms to catch final trial events
+                    pylink.pumpDelay(100)
+                    self.et.stopRecording()
+
+                # Send a message to clear the Data Viewer screen
+                self.parent.clearDVScreen(colour=bg_colour)
+
+                # send a message to mark trial end
+                self.et.sendMessage(f"TRIAL_RESULT {pylink.TRIAL_ERROR}")
 
             # clear the screen
             surf = pygame.display.get_surface()
             surf.fill(bg_colour)
             pygame.display.flip()
-            # Send a message to clear the Data Viewer screen
-            self.parent.clearDVScreen(colour=bg_colour)
-
-            # send a message to mark trial end
-            self.et.sendMessage(f"TRIAL_RESULT {pylink.TRIAL_ERROR}")
 
             return pylink.TRIAL_ERROR
 
@@ -660,36 +661,37 @@ class eyeLink:
         :type bg_colour: tuple[int, int, int], optional
         """
         # disconnect from the tracker if there is an active connection
-        et = pylink.getEYELINK() # TODO: TEST WITH TRACKER FOR NECESSITY
-        if et != self.et: print("trackers not the same?")
+        if not self.dm:
+            et = pylink.getEYELINK() # TODO: TEST WITH TRACKER FOR NECESSITY
+            if et != self.et: print("trackers not the same?")
 
-        if self.et.isConnected(): # if it's not connected, not necessary
-            # Terminate the current trial first if the task terminated prematurely
-            error = self.et.isRecording()
-            if error == pylink.TRIAL_OK:
-                self.win.abort()
+            if self.et.isConnected(): # if it's not connected, not necessary
+                # Terminate the current trial first if the task terminated prematurely
+                error = self.et.isRecording()
+                if error == pylink.TRIAL_OK:
+                    self.win.abort()
 
-            self.et.setOfflineMode() # Put tracker in Offline mode
+                self.et.setOfflineMode() # Put tracker in Offline mode
 
-            # Clear the Host PC screen and wait for 500 ms
-            self.clearHostScreen(BLACK.host)
-            pylink.msecDelay(500)
+                # Clear the Host PC screen and wait for 500 ms
+                self.clearHostScreen(BLACK.host)
+                pylink.msecDelay(500)
 
-            self.et.closeDataFile() # Close the edf data file on the Host PC
+                self.et.closeDataFile() # Close the edf data file on the Host PC
 
-            # Show a file transfer message on the screen
-            msg = "EDF data is transferring from EyeLink Host PC..."
-            self.win.show_message(msg, fg_colour, bg_colour)
+                # Show a file transfer message on the screen
+                msg = "EDF data is transferring from EyeLink Host PC..."
+                self.win.show_message(msg, fg_colour, bg_colour)
 
-            # Download the EDF data file from the Host PC to a local data folder
-            # parameters: source_file_on_the_host, destination_file_on_local_drive
-            local_edf = os.path.join(self.folders["s"], self.id + ".EDF")
-            try:
-                self.et.receiveDataFile(self.folders["f"], local_edf)
-            except RuntimeError as error:
-                print("ERROR:", error)
+                # Download the EDF data file from the Host PC to a local data folder
+                # parameters: source_file_on_the_host, destination_file_on_local_drive
+                local_edf = os.path.join(self.folders["s"], self.id + ".EDF")
+                try:
+                    self.et.receiveDataFile(self.folders["f"], local_edf)
+                except RuntimeError as error:
+                    print("ERROR:", error)
 
-            self.et.close() # Close the link to the tracker.
+                self.et.close() # Close the link to the tracker.
 
         # quit pygame and python
         pygame.quit()
