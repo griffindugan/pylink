@@ -65,9 +65,11 @@ class CalibrationGraphics(pylink.EyeLinkCustomDisplay):
         
         if not DISABLE_AUDIO:
             try:
-                self._target_beep = pygame.mixer.Sound("audio/type.wav")
-                self._done_beep = pygame.mixer.Sound("audio/qbeep.wav")
-                self._error_beep = pygame.mixer.Sound("audio/error.wav")
+                mod_dir = os.path.dirname(os.path.abspath(__file__))
+                audio_folder = os.path.join(mod_dir, 'audio')
+                self._target_beep = pygame.mixer.Sound(os.path.join(audio_folder, "type.wav"))
+                self._done_beep = pygame.mixer.Sound(os.path.join(audio_folder, "qbeep.wav"))
+                self._error_beep = pygame.mixer.Sound(os.path.join(audio_folder, "error.wav"))
             except Exception as e:
                 print ('Failed to load audio: '+ str(e))
                 #we failed to load audio, so disable it
