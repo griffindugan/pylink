@@ -156,9 +156,11 @@ class CalibrationGraphics(pylink.EyeLinkCustomDisplay):
             error_beep -- calibration/drift-correction error.
         """
 
+        mod_dir = os.path.dirname(os.path.abspath(__file__))
+        audio_folder = os.path.join(mod_dir, 'audio')
         # target beep
         if target_beep == '':
-            self._target_beep = pygame.mixer.Sound("type.wav")
+            self._target_beep = pygame.mixer.Sound(os.path.join(audio_folder, "type.wav"))
         elif target_beep == 'off':
             self._target_beep = None
         else:
@@ -166,7 +168,7 @@ class CalibrationGraphics(pylink.EyeLinkCustomDisplay):
 
         # done beep
         if done_beep == '':
-            self._done_beep = pygame.mixer.Sound("qbeep.wav")
+            self._done_beep = pygame.mixer.Sound(os.path.join(audio_folder, "qbeep.wav"))
         elif done_beep == 'off':
             self._done_beep = None
         else:
@@ -174,7 +176,7 @@ class CalibrationGraphics(pylink.EyeLinkCustomDisplay):
 
         # error beep
         if error_beep == '':
-            self._error_beep = pygame.mixer.Sound("error.wav")
+            self._error_beep = pygame.mixer.Sound(os.path.join(audio_folder, "error.wav"))
         elif error_beep == 'off':
             self._error_beep = None
         else:
